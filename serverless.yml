@@ -59,6 +59,7 @@ functions:
           method: POST
   processImage:
     handler: src/functions/triggers/processImage.handler
+    timeout: 20
     layers:
       - !Ref SharpLambdaLayer
     events:
@@ -72,6 +73,7 @@ functions:
 
 resources:
   Resources:
+    # DynamoDB Table
     LivesTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -83,7 +85,25 @@ resources:
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+
+    # S3 Bucket
     LivesImagesBucket:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: async-process-s3-triggers-images
+
+    # SQS Queue
+    ImageProcessingQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ImageProcessingQueue
+        VisibilityTimeout: 20
+        ReceiveMessageWaitTimeSeconds: 20
+        RedrivePolicy:
+          maxReceiveCount: 2
+          deadLetterTargetArn: !GetAtt ImageProcessingDLQ.Arn
+    ImageProcessingDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ImageProcessingDLQ
+        MessageRetentionPeriod: 1209600 # 14 days
