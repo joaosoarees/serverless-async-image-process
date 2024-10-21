@@ -11,6 +11,7 @@ provider:
   environment:
     LIVES_TABLE: !Ref LivesTable
     LIVES_IMAGES_BUCKET: !Ref LivesImagesBucket
+    IMAGE_PROCESSING_QUEUE_URL: !Ref ImageProcessingQueue
   iam:
     role:
       statements:
@@ -24,6 +25,10 @@ provider:
             - s3:PutObject
             - s3:GetObject
           Resource: !Join ['/', [!GetAtt LivesImagesBucket.Arn, '*']]
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+          Resource: !GetAtt ImageProcessingQueue.Arn
 
 package:
   individually: true
@@ -57,11 +62,8 @@ functions:
       - httpApi:
           path: /lives
           method: POST
-  processImage:
-    handler: src/functions/triggers/processImage.handler
-    timeout: 20
-    layers:
-      - !Ref SharpLambdaLayer
+  newS3ObjectTrigger:
+    handler: src/functions/triggers/newS3ObjectTrigger.handler
     events:
       - s3:
           bucket: !Ref LivesImagesBucket
@@ -70,6 +72,15 @@ functions:
           forceDeploy: true
           rules:
             - prefix: uploads/
+  processImage:
+    handler: src/functions/queues/processImage.handler
+    timeout: 20
+    layers:
+      - !Ref SharpLambdaLayer
+    events:
+      - sqs:
+          arn: !GetAtt ImageProcessingQueue.Arn
+          batchSize: 10
 
 resources:
   Resources:

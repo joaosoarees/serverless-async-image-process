@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "chmod +x ./build-layers.sh && ./build-layers.sh"
+    "deploy": "chmod +x ./build-layers.sh && ./build-layers.sh && sls deploy"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +24,7 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.674.0",
     "@aws-sdk/client-s3": "^3.675.0",
+    "@aws-sdk/client-sqs": "^3.675.0",
     "@aws-sdk/lib-dynamodb": "^3.674.0",
     "@aws-sdk/s3-request-presigner": "^3.675.0",
     "sharp": "^0.33.5",
@@ -32,8 +32,13 @@
   },
   "pnpm": {
     "supportedArchitectures": {
-      "os": ["current", "linux"],
-      "cpu": ["arm64"]
+      "os": [
+        "current",
+        "linux"
+      ],
+      "cpu": [
+        "arm64"
+      ]
     }
   }
 }

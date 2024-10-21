@@ -1,31 +1,32 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
-import type { S3Event } from 'aws-lambda';
+import type { SQSEvent } from 'aws-lambda';
 import sharp from 'sharp';
 
 import { dynamoClient } from '@/clients/dynamoClient';
 import { s3Client } from '@/clients/s3Client';
+
 import { env } from '@/config/env';
+
 import { extractFileInfo } from '@/utils/extractFileInfo';
 import { getS3Object } from '@/utils/getS3Object';
 import { getS3ObjectMetadata } from '@/utils/getS3ObjectMetadata';
 
-export async function handler(event: S3Event) {
+interface ISqsRecordBody {
+  bucket: string;
+  key: string;
+}
+
+export async function handler(event: SQSEvent) {
   console.log(JSON.stringify(event, null, 2));
 
   await Promise.all(
     event.Records.map(async (record) => {
-      const { bucket, object } = record.s3;
+      const { bucket, key } = JSON.parse(record.body) as ISqsRecordBody;
 
       const [file, metadata] = await Promise.all([
-        getS3Object({
-          bucket: bucket.name,
-          key: object.key,
-        }),
-        getS3ObjectMetadata({
-          bucket: bucket.name,
-          key: object.key,
-        }),
+        getS3Object({ bucket, key }),
+        getS3ObjectMetadata({ bucket, key }),
       ]);
 
       const liveId = metadata.liveid;
@@ -63,14 +64,14 @@ export async function handler(event: S3Event) {
           .toBuffer(),
       ]);
 
-      const { fileName } = extractFileInfo(object.key);
+      const { fileName } = extractFileInfo(key);
 
       const hdThumbnailKey = `processed/${fileName}_hd.webp`;
       const sdThumbnailKey = `processed/${fileName}_sd.webp`;
       const placeholderThumbnailKey = `processed/${fileName}_placeholder.webp`;
 
       const hdPutObjectCommand = new PutObjectCommand({
-        Bucket: bucket.name,
+        Bucket: bucket,
         Key: hdThumbnailKey,
         Body: hdImage,
         Metadata: {
@@ -78,7 +79,7 @@ export async function handler(event: S3Event) {
         },
       });
       const sdPutObjectCommand = new PutObjectCommand({
-        Bucket: bucket.name,
+        Bucket: bucket,
         Key: sdThumbnailKey,
         Body: sdImage,
         Metadata: {
@@ -86,7 +87,7 @@ export async function handler(event: S3Event) {
         },
       });
       const placeholderPutObjectCommand = new PutObjectCommand({
-        Bucket: bucket.name,
+        Bucket: bucket,
         Key: placeholderThumbnailKey,
         Body: placeholderImage,
         Metadata: {
