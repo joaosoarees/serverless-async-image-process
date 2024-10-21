@@ -51,6 +51,9 @@ export async function handler(
   const putObjectCommand = new PutObjectCommand({
     Bucket: env.LIVES_IMAGES_BUCKET,
     Key: thumbnailKey,
+    Metadata: {
+      liveid: liveId,
+    },
   });
 
   const uploadUrl = await getSignedUrl(s3Client, putObjectCommand, {
