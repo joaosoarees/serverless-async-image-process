@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "chmod +x ./build-layers.sh && ./build-layers.sh"
   },
   "keywords": [],
   "author": "",
