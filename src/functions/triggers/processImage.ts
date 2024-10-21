@@ -5,6 +5,7 @@ import sharp from 'sharp';
 import { s3Client } from '@/clients/s3Client';
 import { extractFileInfo } from '@/utils/extractFileInfo';
 import { getS3Object } from '@/utils/getS3Object';
+import { getS3ObjectMetadata } from '@/utils/getS3ObjectMetadata';
 
 export async function handler(event: S3Event) {
   console.log(JSON.stringify(event, null, 2));
@@ -13,10 +14,18 @@ export async function handler(event: S3Event) {
     event.Records.map(async (record) => {
       const { bucket, object } = record.s3;
 
-      const file = await getS3Object({
-        bucket: bucket.name,
-        key: object.key,
-      });
+      const [file, metadata] = await Promise.all([
+        getS3Object({
+          bucket: bucket.name,
+          key: object.key,
+        }),
+        getS3ObjectMetadata({
+          bucket: bucket.name,
+          key: object.key,
+        }),
+      ]);
+
+      console.log(JSON.stringify(metadata, null, 2));
 
       const [hdImage, sdImage, placeholderImage] = await Promise.all([
         sharp(file)
