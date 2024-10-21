@@ -15,7 +15,9 @@ provider:
     role:
       statements:
         - Effect: Allow
-          Action: dynamodb:PutItem
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
           Resource: !GetAtt LivesTable.Arn
         - Effect: Allow
           Action:
