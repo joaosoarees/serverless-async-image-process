@@ -49,6 +49,8 @@ functions:
           event: s3:ObjectCreated:*
           existing: true
           forceDeploy: true
+          rules:
+            - prefix: uploads/
 
 resources:
   Resources:

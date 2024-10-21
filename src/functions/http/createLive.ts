@@ -34,7 +34,7 @@ export async function handler(
   const { title, number, fileName } = data;
 
   const { extension } = extractFileInfo(fileName);
-  const thumbnailKey = `${randomUUID()}.${extension}`;
+  const thumbnailKey = `uploads/${randomUUID()}.${extension}`;
 
   const liveId = randomUUID();
 
