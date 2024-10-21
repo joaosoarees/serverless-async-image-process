@@ -41,6 +41,14 @@ functions:
       - httpApi:
           path: /lives
           method: POST
+  processImage:
+    handler: src/functions/triggers/processImage.handler
+    events:
+      - s3:
+          bucket: !Ref LivesImagesBucket
+          event: s3:ObjectCreated:*
+          existing: true
+          forceDeploy: true
 
 resources:
   Resources:

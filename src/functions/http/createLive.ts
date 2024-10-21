@@ -1,3 +1,5 @@
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type {
   APIGatewayProxyEventV2,
@@ -11,8 +13,6 @@ import { s3Client } from '@/clients/s3Client';
 import { env } from '@/config/env';
 import { extractFileInfo } from '@/utils/extractFileInfo';
 import { response } from '@/utils/response';
-import { PutObjectCommand } from '@aws-sdk/client-s3';
-import { PutCommand } from '@aws-sdk/lib-dynamodb';
 
 const schema = z.object({
   title: z.string().min(1),
