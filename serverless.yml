@@ -33,6 +33,8 @@ build:
     sourcemap: false
     exclude:
       - '@aws-sdk/*'
+    external:
+      - sharp
 
 functions:
   createLive:
