@@ -12,6 +12,8 @@ export async function handler(event: S3Event) {
     QueueUrl: env.IMAGE_PROCESSING_QUEUE_URL,
     Entries: event.Records.map((record) => ({
       Id: randomUUID(),
+      MessageGroupId: randomUUID(),
+      MessageDeduplicationId: randomUUID(),
       MessageBody: JSON.stringify({
         bucket: record.s3.bucket.name,
         key: record.s3.object.key,
